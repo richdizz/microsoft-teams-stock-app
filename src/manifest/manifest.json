@@ -76,7 +76,7 @@
   "composeExtensions": [
     {
       "botId": "aa9e0885-7e73-489c-9734-740956c2d5e4",
-      "scopes": [ "personal", "team" ],
+      "scopes": [ "team" ],
       "commands": [{
           "id": "searchCmd",
           "description": "Search stock symbols",
