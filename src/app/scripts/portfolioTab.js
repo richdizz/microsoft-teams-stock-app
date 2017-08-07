@@ -47,6 +47,7 @@ class portfolioTab {
                         });
                     }, function (err) {
                         //TODO
+                        $scope.wait = false;
                         console.log(err);
                     });
                 });

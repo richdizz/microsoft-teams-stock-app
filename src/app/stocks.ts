@@ -215,7 +215,7 @@ export class stocks {
 
                     // send the deep link to the item but only in a Channel
                     if (session.message.sourceEvent.teamsChannelId) {
-                        let dl_context = encodeURIComponent(`{"subEntityId": "${symbol}", "canvasUrl": "https://stocks.ngrok.io/teamPortfolioTab.html", "channelId": "${session.message.sourceEvent.teamsChannelId}"}`);
+                        let dl_context = encodeURIComponent(`{"subEntityId": "${symbol}", "canvasUrl": "https://teamportfolio.azurewebsites.net/teamPortfolioTab.html", "channelId": "${session.message.sourceEvent.teamsChannelId}"}`);
                         let deeplink = `https://teams.microsoft.com/l/entity/f546297d-d54c-1009-a49a-efd66da91b2b/stocks?webUrl=${encodeURIComponent('https://www.cnbc.com/quotes/?symbol=' + symbol)}&label=${symbol}&context=${dl_context}`;
                         session.send(`${symbol} has been added to the team portfolio and can be viewed <a href="${deeplink}">here</a>`);
                     }
@@ -305,7 +305,7 @@ export class stocks {
 
                 // send the deep link to the item but only in a Channel
                 if (session.message.sourceEvent.teamsChannelId) {
-                    let dl_context = encodeURIComponent(`{"subEntityId": "${symbol}", "canvasUrl": "https://stocks.ngrok.io/teamPortfolioTab.html", "channelId": "${session.message.sourceEvent.teamsChannelId}"}`);
+                    let dl_context = encodeURIComponent(`{"subEntityId": "${symbol}", "canvasUrl": "https://teamportfolio.azurewebsites.net/teamPortfolioTab.html", "channelId": "${session.message.sourceEvent.teamsChannelId}"}`);
                     let deeplink = `https://teams.microsoft.com/l/entity/f546297d-d54c-1009-a49a-efd66da91b2b/stocks?webUrl=${encodeURIComponent('https://www.cnbc.com/quotes/?symbol=' + symbol)}&label=${symbol}&context=${dl_context}`;
                     card.buttons([
                         btn,

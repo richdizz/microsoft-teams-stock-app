@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 require('dotenv').config();
 const mongodb = require("mongodb");
+const portfolioAccount_1 = require("../models/portfolioAccount");
 const stockSymbolController_1 = require("../controllers/stockSymbolController");
 class PortfolioAccountController {
     static getAccountSvc(req, res) {
@@ -9,7 +10,9 @@ class PortfolioAccountController {
             PortfolioAccountController.getAccount(req.query.id).then((acct) => {
                 res.json(acct);
             }, (err) => {
-                res.status(500).send({ error: err });
+                let acct = new portfolioAccount_1.PortfolioAccount();
+                acct.id = req.query.id;
+                res.json(acct);
             });
         }
         else
