@@ -11,7 +11,9 @@ export class PortfolioAccountController {
             PortfolioAccountController.getAccount(req.query.id).then((acct:any) => {
                 res.json(acct);
             }, (err:any) => {
-                res.status(500).send({ error: err });
+                let acct:PortfolioAccount = new PortfolioAccount();
+                acct.id = req.query.id;
+                res.json(acct);
             });
         }
         else

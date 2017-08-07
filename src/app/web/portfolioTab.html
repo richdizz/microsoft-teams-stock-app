@@ -44,6 +44,7 @@
       </div>
     </div>
 
+    <h2 ng-hide="{data.stocks && data.stocks.length > 0}" ng-cloak>No stocks in portfolio</h2>
     <div id="columns">
       <div class="pin" ng-repeat="s in data.stocks" ng-cloak>
         <h1>{{s.symbol}} {{s.current | number:2}}</h1>

@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 25);
+/******/ 	return __webpack_require__(__webpack_require__.s = 26);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -86,10 +86,10 @@ module.exports = require("request");
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const stockSymbol_1 = __webpack_require__(5);
+const stockSymbol_1 = __webpack_require__(6);
 const parse = __webpack_require__(3);
 const request = __webpack_require__(1);
-const cache = __webpack_require__(7);
+const cache = __webpack_require__(8);
 class StockSymbolController {
     static getSymbolsForExchange(exchange) {
         return new Promise((resolve, reject) => {
@@ -164,13 +164,19 @@ module.exports = require("csv-parse");
 
 /***/ }),
 /* 4 */
+/***/ (function(module, exports) {
+
+module.exports = require("mongodb");
+
+/***/ }),
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const stockQuote_1 = __webpack_require__(16);
+const stockQuote_1 = __webpack_require__(17);
 const dateStat_1 = __webpack_require__(15);
 const stockSymbolController_1 = __webpack_require__(2);
 const request = __webpack_require__(1);
@@ -250,7 +256,7 @@ exports.StockQuoteController = StockQuoteController;
 
 
 /***/ }),
-/* 5 */
+/* 6 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -266,22 +272,16 @@ exports.StockSymbol = StockSymbol;
 
 
 /***/ }),
-/* 6 */
+/* 7 */
 /***/ (function(module, exports) {
 
 module.exports = require("botbuilder-teams");
 
 /***/ }),
-/* 7 */
-/***/ (function(module, exports) {
-
-module.exports = require("memory-cache");
-
-/***/ }),
 /* 8 */
 /***/ (function(module, exports) {
 
-module.exports = require("mongodb");
+module.exports = require("memory-cache");
 
 /***/ }),
 /* 9 */
@@ -291,15 +291,15 @@ module.exports = require("mongodb");
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const Express = __webpack_require__(21);
-const bodyParser = __webpack_require__(19);
-const http = __webpack_require__(22);
-const path = __webpack_require__(24);
-const morgan = __webpack_require__(23);
-const teams = __webpack_require__(6);
-const stocks_1 = __webpack_require__(17);
+const Express = __webpack_require__(22);
+const bodyParser = __webpack_require__(20);
+const http = __webpack_require__(23);
+const path = __webpack_require__(25);
+const morgan = __webpack_require__(24);
+const teams = __webpack_require__(7);
+const stocks_1 = __webpack_require__(18);
 const portfolioAccountController_1 = __webpack_require__(11);
-const stockQuoteController_1 = __webpack_require__(4);
+const stockQuoteController_1 = __webpack_require__(5);
 const stockSymbolController_1 = __webpack_require__(2);
 let express = Express();
 let port = process.env.port || process.env.PORT || 3008;
@@ -365,10 +365,10 @@ http.createServer(express).listen(port, (err) => {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const stockSymbol_1 = __webpack_require__(5);
+const stockSymbol_1 = __webpack_require__(6);
 const parse = __webpack_require__(3);
 const request = __webpack_require__(1);
-const cache = __webpack_require__(7);
+const cache = __webpack_require__(8);
 class StockSymbolController {
     static getSymbolsForExchange(exchange) {
         return new Promise((resolve, reject) => {
@@ -443,7 +443,8 @@ exports.StockSymbolController = StockSymbolController;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const mongodb = __webpack_require__(8);
+const mongodb = __webpack_require__(4);
+const portfolioAccount_1 = __webpack_require__(16);
 const stockSymbolController_1 = __webpack_require__(2);
 class PortfolioAccountController {
     static getAccountSvc(req, res) {
@@ -451,7 +452,9 @@ class PortfolioAccountController {
             PortfolioAccountController.getAccount(req.query.id).then((acct) => {
                 res.json(acct);
             }, (err) => {
-                res.status(500).send({ error: err });
+                let acct = new portfolioAccount_1.PortfolioAccount();
+                acct.id = req.query.id;
+                res.json(acct);
             });
         }
         else
@@ -521,7 +524,7 @@ exports.PortfolioAccountController = PortfolioAccountController;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const mongodb = __webpack_require__(8);
+const mongodb = __webpack_require__(4);
 class PortfolioAccount {
     constructor() {
         this.stocks = new Array();
@@ -652,12 +655,78 @@ exports.DateStat = DateStat;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-class StockQuote {
+__webpack_require__(0).config();
+const mongodb = __webpack_require__(4);
+class PortfolioAccount {
     constructor() {
-        this.stats = new Array();
+        this.stocks = new Array();
+    }
+    update() {
+        // update the user in the database
+        let context = this;
+        var mongoClient = mongodb.MongoClient;
+        mongoClient.connect(process.env.MONGO_CONN_STRING, (err, db) => {
+            var x = db.collection('accounts').updateOne({ 'id': context.id }, context);
+            db.close();
+        });
+    }
+    static ensureAccount(session) {
+        return new Promise((resolve, reject) => {
+            // first fetch member list to get the user's profile (for 1:1 this will just be the user)
+            var connector = session.connector;
+            connector.fetchMemberList(session.message.address.serviceUrl, (session.message.address.conversation) ? session.message.address.conversation.id : '', session.message.sourceEvent.tenant.id, (err, result) => {
+                if (err) {
+                    reject('Error fetching members');
+                }
+                else {
+                    let user;
+                    // loop through the users and find the right match
+                    for (var i = 0; i < result.length; i++) {
+                        if (result[i].id == session.message.user.id) {
+                            user = result[i];
+                            break;
+                        }
+                    }
+                    // initialize the entity
+                    var entity = new PortfolioAccount();
+                    // check if this is an add for Team channel or individual
+                    if (session.message.sourceEvent.teamsChannelId) {
+                        // this is a Team channel
+                        entity.id = session.message.sourceEvent.teamsChannelId;
+                        entity.alt_id = session.message.sourceEvent.teamsTeamId;
+                    }
+                    else {
+                        //this is an individual
+                        entity.id = user.userPrincipalName;
+                        entity.alt_id = user.id;
+                        entity.name = user.name;
+                    }
+                    // ensure user is in database
+                    var mongoClient = mongodb.MongoClient;
+                    mongoClient.connect(process.env.MONGO_CONN_STRING, (err, db) => {
+                        // try to locate the user
+                        var cursor = db.collection('accounts').find({ "id": entity.id });
+                        cursor.next((e, r) => {
+                            if (r) {
+                                // user exists so just populate stocks and resolve
+                                entity.stocks = r.stocks;
+                                resolve(entity);
+                                db.close();
+                            }
+                            else {
+                                // need to create a placeholder for the user
+                                var x = db.collection('accounts').insertOne(entity);
+                                resolve(entity);
+                                db.close();
+                            }
+                        });
+                    });
+                }
+            });
+        });
     }
 }
-exports.StockQuote = StockQuote;
+exports.PortfolioAccount = PortfolioAccount;
 
 
 /***/ }),
@@ -667,18 +736,33 @@ exports.StockQuote = StockQuote;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-const appinsights = __webpack_require__(18);
+class StockQuote {
+    constructor() {
+        this.stats = new Array();
+    }
+}
+exports.StockQuote = StockQuote;
+
+
+/***/ }),
+/* 18 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const appinsights = __webpack_require__(19);
 appinsights.setup("4b67eebf-bfc2-427d-a795-f808b2fa3faa");
 appinsights.start();
 __webpack_require__(0).config();
-const builder = __webpack_require__(20);
+const builder = __webpack_require__(21);
 const request = __webpack_require__(1);
 const StockQuote_1 = __webpack_require__(14);
-const stockQuoteController_1 = __webpack_require__(4);
+const stockQuoteController_1 = __webpack_require__(5);
 const StockSymbolController_1 = __webpack_require__(10);
 const PortfolioAccount_1 = __webpack_require__(12);
 const PortfolioItem_1 = __webpack_require__(13);
-const teams = __webpack_require__(6);
+const teams = __webpack_require__(7);
 const parse = __webpack_require__(3);
 /**
  * Implementation for Stocks
@@ -987,49 +1071,49 @@ exports.stocks = stocks;
 
 
 /***/ }),
-/* 18 */
+/* 19 */
 /***/ (function(module, exports) {
 
 module.exports = require("applicationinsights");
 
 /***/ }),
-/* 19 */
+/* 20 */
 /***/ (function(module, exports) {
 
 module.exports = require("body-parser");
 
 /***/ }),
-/* 20 */
+/* 21 */
 /***/ (function(module, exports) {
 
 module.exports = require("botbuilder");
 
 /***/ }),
-/* 21 */
+/* 22 */
 /***/ (function(module, exports) {
 
 module.exports = require("express");
 
 /***/ }),
-/* 22 */
+/* 23 */
 /***/ (function(module, exports) {
 
 module.exports = require("http");
 
 /***/ }),
-/* 23 */
+/* 24 */
 /***/ (function(module, exports) {
 
 module.exports = require("morgan");
 
 /***/ }),
-/* 24 */
+/* 25 */
 /***/ (function(module, exports) {
 
 module.exports = require("path");
 
 /***/ }),
-/* 25 */
+/* 26 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(9);
