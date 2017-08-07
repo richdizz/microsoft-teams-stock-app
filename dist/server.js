@@ -689,84 +689,90 @@ class stocks {
      * @param connector
      */
     constructor(connector) {
-        this.Connector = connector;
-        this.universalBot = new builder.UniversalBot(this.Connector);
-        // Install sendTyping as middleware
-        this.universalBot.use({
-            botbuilder: (session, next) => {
-                session.sendTyping();
-                next();
-            }
-        });
-        // Add dialogs here
-        this.universalBot.dialog('/', this.defaultDialog);
-        this.universalBot.dialog('/help', this.helpDialog);
-        this.universalBot.dialog('/add', this.addDialog);
-        this.universalBot.dialog('/remove', this.removeDialog);
-        this.universalBot.dialog('/quote', this.quoteDialog);
-        this.universalBot.dialog('/list', this.listDialog);
-        // Handle conversationUpdate events
-        this.universalBot.on('conversationUpdate', (activity) => {
-            if (activity.sourceEvent &&
-                activity.sourceEvent.eventType == 'teamMemberAdded' &&
-                activity.membersAdded[0].id == activity.address.bot.id) {
-                var botmessage = new builder.Message()
-                    .address(activity.address)
-                    .text(stocks.getHelpMsg());
-                this.universalBot.send(botmessage, function (err) { });
-            }
-        });
-        // Handle compose extension for searching stocks
-        this.Connector.onQuery('searchCmd', (event, query, callback) => {
-            // check if this is the initialRun of the extension
-            if (query && query.parameters && query.parameters[0].name === 'initialRun') {
-                // initial run...we don't use this given huge list of symbols
-            }
-            else {
-                // start by getting all stock symbols and then we will filter down by query text
-                StockSymbolController_1.StockSymbolController.getSymbols().then((data) => {
-                    // get query parameters for paging and the query text
-                    let q = query.parameters[0].value;
-                    let skip = query.queryOptions.skip;
-                    let cnt = query.queryOptions.count;
-                    let filtered = data.filter(symbol => symbol.symbol.indexOf(q) == 0).splice(skip, cnt);
-                    // get the last trade, change price, and change pct for each results
-                    let symbols = filtered.map((a) => { return a.symbol; });
-                    let symbols_str = symbols.join('+');
-                    let uri = `http://finance.yahoo.com/d/quotes.csv?s=${symbols_str}&f=cl`;
-                    request.get(uri, {}, (err, resp, body) => {
-                        // Parse the results as csv
-                        parse(resp.body, {}, (parse_error, output) => {
-                            // Add stock quotes to each result
-                            let attachments = [];
-                            for (var i = 0; i < filtered.length; i++) {
-                                // skip bad symbols
-                                if (output[i][0].indexOf('N/A') == -1) {
-                                    let change = output[i][0].split(' - ');
-                                    change[0] = change[0].replace('+', '');
-                                    change[1] = change[1].replace('%', '').replace('+', '');
-                                    let last = output[i][1].split(' - ');
-                                    last[1] = last[1].replace('<b>', '').replace('</b>', '');
-                                    // convert StockSymbol to full StockQuote
-                                    let quote = new StockQuote_1.StockQuote();
-                                    quote.symbol = filtered[i].symbol;
-                                    quote.name = filtered[i].company_name;
-                                    quote.current = +last[1];
-                                    quote.curr_change = +change[0];
-                                    quote.pct_change = +change[1] / 100;
-                                    attachments.push(stocks.formatQuoteCard(quote).toAttachment());
+        try {
+            this.Connector = connector;
+            this.universalBot = new builder.UniversalBot(this.Connector);
+            // Install sendTyping as middleware
+            this.universalBot.use({
+                botbuilder: (session, next) => {
+                    session.sendTyping();
+                    next();
+                }
+            });
+            // Add dialogs here
+            this.universalBot.dialog('/', this.defaultDialog);
+            this.universalBot.dialog('/help', this.helpDialog);
+            this.universalBot.dialog('/add', this.addDialog);
+            this.universalBot.dialog('/remove', this.removeDialog);
+            this.universalBot.dialog('/quote', this.quoteDialog);
+            this.universalBot.dialog('/list', this.listDialog);
+            // Handle conversationUpdate events
+            this.universalBot.on('conversationUpdate', (activity) => {
+                if (activity.sourceEvent &&
+                    activity.sourceEvent.eventType == 'teamMemberAdded' &&
+                    activity.membersAdded[0].id == activity.address.bot.id) {
+                    var botmessage = new builder.Message()
+                        .address(activity.address)
+                        .text(stocks.getHelpMsg());
+                    this.universalBot.send(botmessage, function (err) { });
+                }
+            });
+            // Handle compose extension for searching stocks
+            this.Connector.onQuery('searchCmd', (event, query, callback) => {
+                // check if this is the initialRun of the extension
+                if (query && query.parameters && query.parameters[0].name === 'initialRun') {
+                    // initial run...we don't use this given huge list of symbols
+                }
+                else {
+                    // start by getting all stock symbols and then we will filter down by query text
+                    StockSymbolController_1.StockSymbolController.getSymbols().then((data) => {
+                        // get query parameters for paging and the query text
+                        let q = query.parameters[0].value;
+                        let skip = query.queryOptions.skip;
+                        let cnt = query.queryOptions.count;
+                        let filtered = data.filter(symbol => symbol.symbol.indexOf(q) == 0).splice(skip, cnt);
+                        // get the last trade, change price, and change pct for each results
+                        let symbols = filtered.map((a) => { return a.symbol; });
+                        let symbols_str = symbols.join('+');
+                        let uri = `http://finance.yahoo.com/d/quotes.csv?s=${symbols_str}&f=cl`;
+                        request.get(uri, {}, (err, resp, body) => {
+                            // Parse the results as csv
+                            parse(resp.body, {}, (parse_error, output) => {
+                                // Add stock quotes to each result
+                                let attachments = [];
+                                for (var i = 0; i < filtered.length; i++) {
+                                    // skip bad symbols
+                                    if (output[i][0].indexOf('N/A') == -1) {
+                                        let change = output[i][0].split(' - ');
+                                        change[0] = change[0].replace('+', '');
+                                        change[1] = change[1].replace('%', '').replace('+', '');
+                                        let last = output[i][1].split(' - ');
+                                        last[1] = last[1].replace('<b>', '').replace('</b>', '');
+                                        // convert StockSymbol to full StockQuote
+                                        let quote = new StockQuote_1.StockQuote();
+                                        quote.symbol = filtered[i].symbol;
+                                        quote.name = filtered[i].company_name;
+                                        quote.current = +last[1];
+                                        quote.curr_change = +change[0];
+                                        quote.pct_change = +change[1] / 100;
+                                        attachments.push(stocks.formatQuoteCard(quote).toAttachment());
+                                    }
                                 }
-                            }
-                            // Return result response
-                            let response = teams.ComposeExtensionResponse.result('list')
-                                .attachments(attachments)
-                                .toResponse();
-                            callback(null, response, 200);
+                                // Return result response
+                                let response = teams.ComposeExtensionResponse.result('list')
+                                    .attachments(attachments)
+                                    .toResponse();
+                                callback(null, response, 200);
+                            });
                         });
                     });
-                });
-            }
-        });
+                }
+            });
+        }
+        catch (x) {
+            console.log('Exception');
+            console.log(x);
+        }
     }
     /**
      * This is the default dialog used by the bot...it routes to other dialogs

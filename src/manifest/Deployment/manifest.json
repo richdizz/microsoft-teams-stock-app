@@ -2,7 +2,7 @@
   "$schema": "https://statics.teams.microsoft.com/sdk/v1.0/manifest/MicrosoftTeams.schema.json",
   "manifestVersion": "1.0",
   "version": "1.0.0",
-  "id": "f546297d-d54c-1009-a49a-efd66da91b2b",
+  "id": "aa9e0885-7e73-489c-9734-740956c2d5e4",
   "packageName": "com.richdizz.stocks",
   "developer": {
     "name": "richdizz",
