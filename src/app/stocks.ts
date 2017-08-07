@@ -1,3 +1,7 @@
+import * as appinsights from 'applicationinsights';
+appinsights.setup("4b67eebf-bfc2-427d-a795-f808b2fa3faa");
+appinsights.start();
+
 require('dotenv').config();
 import * as builder from 'botbuilder';
 import * as request from 'request';

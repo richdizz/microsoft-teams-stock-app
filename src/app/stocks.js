@@ -1,5 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const appinsights = require("applicationinsights");
+appinsights.setup("4b67eebf-bfc2-427d-a795-f808b2fa3faa");
+appinsights.start();
 require('dotenv').config();
 const builder = require("botbuilder");
 const request = require("request");
@@ -37,7 +40,8 @@ class stocks {
         this.universalBot.dialog('/list', this.listDialog);
         // Handle conversationUpdate events
         this.universalBot.on('conversationUpdate', (activity) => {
-            if (activity.sourceEvent.eventType == 'teamMemberAdded' &&
+            if (activity.sourceEvent &&
+                activity.sourceEvent.eventType == 'teamMemberAdded' &&
                 activity.membersAdded[0].id == activity.address.bot.id) {
                 var botmessage = new builder.Message()
                     .address(activity.address)
@@ -103,6 +107,7 @@ class stocks {
      */
     defaultDialog(session) {
         let text = stocks.extractTextFromMessage(session.message);
+        console.log(text);
         if (text.startsWith('help')) {
             session.beginDialog('/help');
             return;

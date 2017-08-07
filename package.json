@@ -42,6 +42,8 @@
     "font-awesome":"4.7.0",
     "chartist":"0.11.0",
     "@types/chartist":"0.9.35",
-    "angular-chartist.js":"4.3.3"
+    "angular-chartist.js":"4.3.3",
+    "applicationinsights":"0.21.0",
+    "@types/applicationinsights":"0.15.33"
   }
 }

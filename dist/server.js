@@ -63,7 +63,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 24);
+/******/ 	return __webpack_require__(__webpack_require__.s = 25);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -291,11 +291,11 @@ module.exports = require("mongodb");
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const Express = __webpack_require__(20);
-const bodyParser = __webpack_require__(18);
-const http = __webpack_require__(21);
-const path = __webpack_require__(23);
-const morgan = __webpack_require__(22);
+const Express = __webpack_require__(21);
+const bodyParser = __webpack_require__(19);
+const http = __webpack_require__(22);
+const path = __webpack_require__(24);
+const morgan = __webpack_require__(23);
 const teams = __webpack_require__(6);
 const stocks_1 = __webpack_require__(17);
 const portfolioAccountController_1 = __webpack_require__(11);
@@ -667,8 +667,11 @@ exports.StockQuote = StockQuote;
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
+const appinsights = __webpack_require__(18);
+appinsights.setup("4b67eebf-bfc2-427d-a795-f808b2fa3faa");
+appinsights.start();
 __webpack_require__(0).config();
-const builder = __webpack_require__(19);
+const builder = __webpack_require__(20);
 const request = __webpack_require__(1);
 const StockQuote_1 = __webpack_require__(14);
 const stockQuoteController_1 = __webpack_require__(4);
@@ -771,6 +774,7 @@ class stocks {
      */
     defaultDialog(session) {
         let text = stocks.extractTextFromMessage(session.message);
+        console.log(text);
         if (text.startsWith('help')) {
             session.beginDialog('/help');
             return;
@@ -986,40 +990,46 @@ exports.stocks = stocks;
 /* 18 */
 /***/ (function(module, exports) {
 
-module.exports = require("body-parser");
+module.exports = require("applicationinsights");
 
 /***/ }),
 /* 19 */
 /***/ (function(module, exports) {
 
-module.exports = require("botbuilder");
+module.exports = require("body-parser");
 
 /***/ }),
 /* 20 */
 /***/ (function(module, exports) {
 
-module.exports = require("express");
+module.exports = require("botbuilder");
 
 /***/ }),
 /* 21 */
 /***/ (function(module, exports) {
 
-module.exports = require("http");
+module.exports = require("express");
 
 /***/ }),
 /* 22 */
 /***/ (function(module, exports) {
 
-module.exports = require("morgan");
+module.exports = require("http");
 
 /***/ }),
 /* 23 */
 /***/ (function(module, exports) {
 
-module.exports = require("path");
+module.exports = require("morgan");
 
 /***/ }),
 /* 24 */
+/***/ (function(module, exports) {
+
+module.exports = require("path");
+
+/***/ }),
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 module.exports = __webpack_require__(9);
