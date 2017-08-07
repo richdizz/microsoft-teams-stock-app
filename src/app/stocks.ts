@@ -27,7 +27,6 @@ export class stocks {
      * @param connector 
      */
     constructor(connector: teams.TeamsChatConnector) {
-        try {
         this.Connector = connector;
         this.universalBot = new builder.UniversalBot(this.Connector);
 
@@ -117,11 +116,6 @@ export class stocks {
                     });
                 }
             });
-        }
-        catch (x) {
-            console.log('Exception');
-            console.log(x);
-        }
     }
 
     /**
