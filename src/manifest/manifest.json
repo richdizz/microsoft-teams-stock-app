@@ -1,0 +1,76 @@
+{
+  "$schema": "https://statics.teams.microsoft.com/sdk/v1.0/manifest/MicrosoftTeams.schema.json",
+  "manifestVersion": "1.0",
+  "version": "1.0.0",
+  "id": "f546297d-d54c-1009-a49a-efd66da91b2b",
+  "packageName": "com.richdizz.stocks",
+  "developer": {
+    "name": "richdizz",
+    "websiteUrl": "https://stocks.ngrok.io",
+    "privacyUrl": "https://stocks.ngrok.io/privacy.html",
+    "termsOfUseUrl": "https://stocks.ngrok.io/tou.html"
+  },
+  "name": {
+    "short": "Stocks",
+    "full": "Stocks app for Microsoft Teams"
+  },
+  "description": {
+    "short": "Stocks app for Microsoft Teams",
+    "full": "The Stocks app for Microsoft Teams allows you to search stock quote and manage personal and team portfolios"
+  },
+  "icons": {
+    "outline": "https://stocks.ngrok.io/assets/icon20.png", 
+    "color": "https://stocks.ngrok.io/assets/icon96.png" 
+  },
+  "accentColor": "#00b3ff",
+  "configurableTabs": [
+    {
+      "configurationUrl": "https://stocks.ngrok.io/portfolioConfig.html",
+      "canUpdateConfiguration": true,
+      "scopes": [ "team" ]
+    }
+  ],
+  "staticTabs": [
+    {
+      "entityId": "313ab3f0-0951-a8c3-d75e-2be2ab8c43a8",
+      "name": "My Portfolio",
+      "contentUrl": "https://stocks.ngrok.io/portfolioTab.html",
+      "websiteUrl": "https://stocks.ngrok.io/portfolioTab.html",
+      "scopes": [ "personal" ]
+    }
+  ],
+  "bots": [
+    {
+      "botId": "aa9e0885-7e73-489c-9734-740956c2d5e4",
+      "needsChannelSelector": true,
+      "isNotificationOnly": false,
+      "scopes": [ "team", "personal" ],
+      "commandLists": []
+    }
+  ],
+  "composeExtensions": [
+    {
+      "botId": "aa9e0885-7e73-489c-9734-740956c2d5e4",
+      "scopes": [ "personal", "team" ],
+      "commands": [{
+          "id": "searchCmd",
+          "description": "Search stock symbols",
+          "title": "Search",
+          "initialRun": false,
+          "parameters": [{
+            "name": "symbol",
+            "description": "Enter a stock symbol",
+            "title": "Stock symbol"
+          }]
+        }
+      ]
+    }
+  ],
+  "permissions": [
+    "identity",
+    "messageTeamMembers"
+  ],
+  "validDomains": [
+    "stocks.ngrok.io"
+  ]
+}

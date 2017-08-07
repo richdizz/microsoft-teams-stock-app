@@ -1,0 +1,471 @@
+/* Copyright (c) Wictor Wilén. All rights reserved. 
+   Copyright (c) Microsoft Corporation. All rights reserved.
+   Licensed under the MIT license.
+*/
+@charset "UTF-8";
+
+html {
+  font-size: 10px;
+}
+body {
+  font-family:  "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif !important;
+  font-size: 1.4rem;
+  min-width: auto;
+}
+a {
+  color: #5558af;
+}
+a:hover, a:focus {
+  text-decoration: underline;
+  outline: none;
+}
+* {
+    box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+}
+/* Form controls */
+.form-field-title:first-of-type {
+  margin-top: 0;
+}
+.form-field-title {
+  display: flex;
+  margin: .7rem 0 .3rem;
+}
+.form-control:focus {
+  border-bottom-color: #5558af;
+  box-shadow: none;
+  outline: 0;
+}
+.form-control {
+  background: #eef1f5;
+  border: 0 solid transparent;
+  border-bottom-width: .2rem;
+  border-radius: .3rem;
+  color: #16233a;
+  resize: none;
+  box-shadow: none;
+  display: block;
+  width: 100%;
+  padding: 6px 12px;
+  font-family: inherit;
+  font-size: 14px;
+  line-height: 1.4286;
+}
+input, textarea {
+    font-family: inherit;
+}
+
+/* Buttons */
+.ts-btn {
+  background: 0;
+  border: .2rem solid transparent;
+  border-radius: .3rem;
+  font-size: 1.4rem;
+  padding: .4rem 3.2rem;
+  height: 3.2rem;
+  min-width: 3.2rem;
+  white-space: nowrap;
+}
+.ts-btn:hover {
+  outline: 0;
+  text-decoration: none
+}
+.ts-btn-primary {
+  background: #5558af;
+  outline-style: none;
+  color: #fff
+}
+.ts-btn-primary:focus,
+.ts-btn-primary:hover {
+  background: #4c509d;
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Generic section styles */
+.section-caption {
+  font-size: 1.2rem;
+  margin: .5rem 0 .5rem 0;
+  color: rgba(22,35,58,.74);
+}
+
+/* Login area */
+.login-container {
+  margin: 0 0 2.0rem 0;
+}
+.logout-link {
+  margin-left: .6rem;
+}
+
+/* Error list */
+.error-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: -2.0rem;
+}
+.error-title {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+.error-subtitle {
+  margin: 0 0 1.6rem 0;
+}
+
+/* Settings area */
+.settings-container {
+  margin: 0 0 2.0rem 0;
+}
+
+/* Dark theme overides */
+body.theme-dark {
+  background: #2b2b30;
+  color: #fff;
+}
+.theme-dark a {
+  color: #9fa4fe;
+}
+.theme-dark .form-control {
+  background: #2b2b30;
+  color: #fff;
+}
+.theme-dark .ts-btn-primary {
+  background: #9fa4fe;
+  color: #2b2b30;
+}
+.theme-dark .ts-btn-primary:focus,
+.theme-dark .ts-btn-primary:hover {
+  background: #696cb9;
+  color: #fff;
+  cursor: pointer;
+}
+.theme-dark .section-caption {
+  color: rgba(255,255,255,.74);
+}
+
+#dlg-theme.theme-dark {
+  background: #404045;
+}
+
+/* High-contrast theme overides */
+body.theme-contrast {
+  background: #000;
+  color: #fff;
+}
+.theme-contrast a {
+  color: #ffff01;
+}
+.theme-contrast .form-control {
+  background: #000;
+  color: #fff;
+}
+.theme-contrast .ts-btn-primary {
+  background: #000;
+  border: .2rem solid #fff;
+  color: #fff;
+}
+.theme-contrast .ts-btn-primary:focus,
+.theme-contrast .ts-btn-primary:hover {
+  background: #ffff01;
+  color: #000;
+  cursor: pointer;
+}
+.theme-contrast .section-caption {
+  color: #fff;
+}
+
+#dlg-theme.theme-contrast {
+  background: #000;
+}
+
+
+
+
+#wrapper {
+	width: 90%;
+	max-width: 1100px;
+	min-width: 800px;
+	margin: 50px auto;
+}
+
+#columns {
+	-webkit-column-count: 3;
+	-webkit-column-gap: 10px;
+	-webkit-column-fill: auto;
+	-moz-column-count: 3;
+	-moz-column-gap: 10px;
+	-moz-column-fill: auto;
+	column-count: 3;
+	column-gap: 15px;
+	column-fill: auto;
+}
+
+.pin {
+	display: inline-block;
+	background: #FEFEFE;
+	border: 2px solid #FAFAFA;
+	box-shadow: 0 1px 2px rgba(34, 25, 25, 0.4);
+	margin: 0 2px 15px;
+	-webkit-column-break-inside: avoid;
+	-moz-column-break-inside: avoid;
+	column-break-inside: avoid;
+	padding: 15px;
+	padding-bottom: 5px;
+	opacity: 1;
+	
+	-webkit-transition: all .2s ease;
+	-moz-transition: all .2s ease;
+	-o-transition: all .2s ease;
+	transition: all .2s ease;
+}
+
+.theme-dark .pin {
+  background: #404045;
+  border: 2px solid #2b2b30;
+}
+
+.theme-contrast .pin {
+  background: #000;
+}
+
+
+.pin > h1 {
+  margin: 0px;
+}
+
+.pin > h2 {
+  margin: 0px;
+}
+
+.pin > p {
+  font-size: 10px;
+}
+
+.pin-btn {
+  cursor: pointer; 
+  padding: 0px 1px 0px 1px; 
+  font-size: 16px;
+}
+
+.pin-btn .fa {
+  padding: 6px; 
+  border: 1px solid rgb(240, 242, 244);
+}
+
+.theme-dark .pin-btn .fa {
+  border: 1px solid #2b2b30;
+}
+
+.theme-contrast .pin-btn .fa {
+  border: 1px solid #fff;
+}
+
+.ngspinner-wrapper {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  z-index: 11000;
+}
+
+.ngspinner-overlay {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  z-index: 11500;
+  background: rgba(22, 35, 58, 0.54);
+}
+.theme-dark .ngspinner-overlay {
+  background: rgba(0,0,0,0.6);
+}
+.theme-contrast .ngspinner-overlay {
+  background: rgba(0,0,0,0.6);
+}
+
+.ngspinner {
+  position: absolute;
+  height: 100px;
+  width: 100px;
+  top: 50%;
+  margin-top: -50px;
+  left: 50%;
+  margin-left: -50px;
+  z-index: 12000;
+}
+
+.ngdialog-wrapper {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  z-index: 9000;
+}
+
+.ngdialog-overlay {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  z-index: 9500;
+  background: rgba(22, 35, 58, 0.54);
+}
+.theme-dark .ngdialog-overlay {
+  background: rgba(0,0,0,0.6);
+}
+.theme-contrast .ngdialog-overlay {
+  background: rgba(0,0,0,0.6);
+}
+
+.ngdialog {
+  position: absolute;
+  z-index: 10000;
+  border: 2px solid rgba(22, 35, 58, 0.36);
+  left: 50%;
+  height: 470px;
+  background: rgb(240, 242, 244);
+  margin-top: 50px;
+}
+.theme-dark .ngdialog {
+  background: #404045;
+  border: 2px solid #fff;
+}
+.theme-contrast .ngdialog {
+  background: #000;
+  border: 2px solid #fff;
+}
+
+@media (max-width: 1025px) {
+  .ngdialog {
+    margin-left: -450px;
+    width: 900px;
+  }
+}
+
+@media (max-width: 901px) {
+  .ngdialog {
+    margin-left: -384px;
+    width: 768px;
+  }
+}
+
+@media (max-width: 769px) {
+  .ngdialog {
+    margin-left: -249px;
+    width: 498px;
+  }
+}
+
+@media (max-width: 499px) {
+  .ngdialog {
+    margin-left: -160px;
+    width:320px;
+  }
+}
+
+.ngdialog-header{
+  text-align: right; 
+  font-size: 16px; 
+  padding-top: 5px;
+  padding-bottom: 5px;
+  padding-right: 10px;
+}
+
+.ct-series.ct-series-a .ct-line {
+  stroke: rgb(36, 150, 241) !important;
+}
+
+.ct-series.ct-series-a .ct-area {
+  stroke: rgb(36, 150, 241) !important;
+  fill: rgb(36, 150, 241) !important;
+}
+
+.ct-grids .ct-grid.ct-horizontal {
+stroke: #444;
+}
+
+.ct-grids .ct-grid.ct-vertical {
+stroke: #444;
+}
+
+.ct-label {
+  color: #444;
+}
+
+.theme-dark .ct-grids .ct-grid.ct-horizontal {
+stroke: #FFF;
+}
+
+.theme-dark .ct-grids .ct-grid.ct-vertical {
+stroke: #FFF;
+}
+
+.theme-dark .ct-label {
+  color: #FFF;
+}
+
+.theme-contrast .ct-grids .ct-grid.ct-horizontal {
+stroke: #FFF;
+}
+
+.theme-contrast .ct-grids .ct-grid.ct-vertical {
+stroke: #FFF;
+}
+
+.theme-contrast .ct-label {
+  color: #FFF;
+}
+
+.ngdialog-stats {
+  width: 100%;
+  height: 75px;
+  padding-left: 20px;
+}
+.ngdialog-stats h1 {
+  padding: 0px;
+  margin: 0px;
+}
+.ngdialog-stats h2 {
+  padding-top: 0px;
+  padding-left: 0px;
+  padding-right: 0px;
+  padding-bottom: 10px;
+  margin: 0px;
+}
+
+.ngdialog-chart {
+  width: 100%;
+  height: 300px;
+}
+
+.ngdialog-chart h3 {
+  padding-left: 20px;
+  padding-top: 20px;
+  padding-bottom: 0px;
+  margin-bottom: 0px;
+}
+
+.ngdialog-row {
+  width: 100%;
+  float: left;
+}
+
+.ngdialog-column {
+  width: 100px;
+  float: left;
+}
+
+.ngdialog-column-header {
+  font-size: 12px;
+}
+
+.ngdialog-column-item {
+  font-size: 16px;
+}
+
+.ng-cloak { display: none; }
