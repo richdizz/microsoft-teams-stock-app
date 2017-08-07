@@ -10,7 +10,7 @@ const teams = require("botbuilder-teams");
 const stocks_1 = require("./stocks");
 const portfolioAccountController_1 = require("./controllers/portfolioAccountController");
 const stockQuoteController_1 = require("./controllers/stockQuoteController");
-const StockSymbol_1 = require("./models/StockSymbol");
+const stockSymbolController_1 = require("./controllers/stockSymbolController");
 let express = Express();
 let port = process.env.port || process.env.PORT || 3008;
 express.use(bodyParser.json());
@@ -27,9 +27,10 @@ let bot = new stocks_1.stocks(new teams.TeamsChatConnector(botSettings));
 express.post('/api/messages', bot.Connector.listen());
 // Setup API controllers for the app
 express.get('/api/account', portfolioAccountController_1.PortfolioAccountController.getAccountSvc);
+express.delete('/api/account/:id/:symbol', portfolioAccountController_1.PortfolioAccountController.deleteStockSvc);
 express.get('/api/quote/:symbol', stockQuoteController_1.StockQuoteController.getQuoteSvc);
 // Load symbols into cache
-StockSymbol_1.StockSymbol.getSymbols().then(function (data) {
+stockSymbolController_1.StockSymbolController.getSymbols().then(function (data) {
     // Do nothing...just for cache
 });
 // This is used to prevent your tabs from being embedded in other systems than Microsoft Teams

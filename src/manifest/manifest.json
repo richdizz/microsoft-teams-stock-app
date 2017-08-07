@@ -6,9 +6,9 @@
   "packageName": "com.richdizz.stocks",
   "developer": {
     "name": "richdizz",
-    "websiteUrl": "https://stocks.ngrok.io",
-    "privacyUrl": "https://stocks.ngrok.io/privacy.html",
-    "termsOfUseUrl": "https://stocks.ngrok.io/tou.html"
+    "websiteUrl": "https://teamportfolio.azurewebsites.net",
+    "privacyUrl": "https://teamportfolio.azurewebsites.net/privacy.html",
+    "termsOfUseUrl": "https://teamportfolio.azurewebsites.net/tou.html"
   },
   "name": {
     "short": "Stocks",
@@ -19,13 +19,13 @@
     "full": "The Stocks app for Microsoft Teams allows you to search stock quote and manage personal and team portfolios"
   },
   "icons": {
-    "outline": "https://stocks.ngrok.io/assets/icon20.png", 
-    "color": "https://stocks.ngrok.io/assets/icon96.png" 
+    "outline": "https://teamportfolio.azurewebsites.net/assets/icon20.png", 
+    "color": "https://teamportfolio.azurewebsites.net/assets/icon96.png" 
   },
   "accentColor": "#00b3ff",
   "configurableTabs": [
     {
-      "configurationUrl": "https://stocks.ngrok.io/portfolioConfig.html",
+      "configurationUrl": "https://teamportfolio.azurewebsites.net/portfolioConfig.html",
       "canUpdateConfiguration": true,
       "scopes": [ "team" ]
     }
@@ -34,8 +34,8 @@
     {
       "entityId": "313ab3f0-0951-a8c3-d75e-2be2ab8c43a8",
       "name": "My Portfolio",
-      "contentUrl": "https://stocks.ngrok.io/portfolioTab.html",
-      "websiteUrl": "https://stocks.ngrok.io/portfolioTab.html",
+      "contentUrl": "https://teamportfolio.azurewebsites.net/portfolioTab.html",
+      "websiteUrl": "https://teamportfolio.azurewebsites.net/portfolioTab.html",
       "scopes": [ "personal" ]
     }
   ],
@@ -45,7 +45,32 @@
       "needsChannelSelector": true,
       "isNotificationOnly": false,
       "scopes": [ "team", "personal" ],
-      "commandLists": []
+      "commandLists": [
+        {
+          "scopes":[
+            "team",
+            "personal"
+          ],
+          "commands":[
+            {
+              "title":"help",
+              "description":"Displays this help message"
+            },
+            {
+              "title":"list",
+              "description":"Outputs your portfolio with stats"
+            },
+            {
+              "title":"add",
+              "description":"Adds a stock to portfolio by symbol"
+            },
+            {
+              "title":"remove",
+              "description":"Removes a stock from your portfolio based on symbol"
+            }
+          ]
+        }
+      ]
     }
   ],
   "composeExtensions": [
@@ -71,6 +96,7 @@
     "messageTeamMembers"
   ],
   "validDomains": [
+    "teamportfolio.azurewebsites.net",
     "stocks.ngrok.io"
   ]
 }

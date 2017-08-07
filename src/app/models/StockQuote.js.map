@@ -1,1 +1,1 @@
-{"version":3,"file":"StockQuote.js","sourceRoot":"","sources":["StockQuote.ts"],"names":[],"mappings":";;AAAA;IACI;IACA,CAAC;CAQJ;AAVD,gCAUC"}
+{"version":3,"file":"StockQuote.js","sourceRoot":"","sources":["StockQuote.ts"],"names":[],"mappings":";;AAEA;IACI;QACI,IAAI,CAAC,KAAK,GAAG,IAAI,KAAK,EAAY,CAAC;IACvC,CAAC;CAUJ;AAbD,gCAaC"}

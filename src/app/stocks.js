@@ -5,10 +5,10 @@ const builder = require("botbuilder");
 const request = require("request");
 const StockQuote_1 = require("./models/StockQuote");
 const stockQuoteController_1 = require("./controllers/stockQuoteController");
+const StockSymbolController_1 = require("./controllers/StockSymbolController");
 const PortfolioAccount_1 = require("./models/PortfolioAccount");
 const PortfolioItem_1 = require("./models/PortfolioItem");
 const teams = require("botbuilder-teams");
-const StockSymbol_1 = require("./models/StockSymbol");
 const parse = require("csv-parse");
 /**
  * Implementation for Stocks
@@ -21,7 +21,6 @@ class stocks {
     constructor(connector) {
         this.Connector = connector;
         this.universalBot = new builder.UniversalBot(this.Connector);
-        //???
         // Install sendTyping as middleware
         this.universalBot.use({
             botbuilder: (session, next) => {
@@ -54,7 +53,7 @@ class stocks {
             }
             else {
                 // start by getting all stock symbols and then we will filter down by query text
-                StockSymbol_1.StockSymbol.getSymbols().then((data) => {
+                StockSymbolController_1.StockSymbolController.getSymbols().then((data) => {
                     // get query parameters for paging and the query text
                     let q = query.parameters[0].value;
                     let skip = query.queryOptions.skip;
@@ -99,7 +98,7 @@ class stocks {
         });
     }
     /**
-     * This is the default dialog used by the bot
+     * This is the default dialog used by the bot...it routes to other dialogs
      * @param session
      */
     defaultDialog(session) {
@@ -126,35 +125,51 @@ class stocks {
         }
     }
     /**
-     * This is the list dialog used by the bot
+     * This is the list dialog used by the bot...it displays all stocks in portfolio
      * @param session
      */
     listDialog(session) {
-    }
-    /**
-     * This is the help dialog of the bot
-     * @param session
-     */
-    quoteDialog(session) {
-        let symbol = stocks.extractTextFromMessage(session.message);
-        stockQuoteController_1.StockQuoteController.getQuote(symbol).then((quote) => {
-            var card = stocks.formatQuoteCard(quote)
-                .buttons([
-                builder.CardAction.imBack(session, `add ${quote.symbol}`, 'Add to portfolio'),
-                builder.CardAction.imBack(session, `detail ${quote.symbol}`, 'View details')
-            ]);
-            var msg = new builder.Message(session).addAttachment(card.toAttachment());
-            session.send(msg);
-            session.endDialog();
-            return;
+        PortfolioAccount_1.PortfolioAccount.ensureAccount(session).then((account) => {
+            session.send(`Getting quotes for all ${account.stocks.length} stocks in your portfolio`);
+            var msg = new builder.Message(session);
+            msg.attachmentLayout(builder.AttachmentLayout.carousel);
+            let cnt = 0;
+            for (var i = 0; i < account.stocks.length; i++) {
+                stocks.getQuoteCard(account.stocks[i].symbol, session, account).then((card) => {
+                    msg.addAttachment(card);
+                    cnt++;
+                    if (cnt == account.stocks.length) {
+                        session.send(msg);
+                        session.endDialog();
+                    }
+                }, (err) => {
+                    session.endDialog('Unknown stock symbol');
+                });
+            }
         }, (err) => {
-            session.send('Unknown stock symbol');
-            session.endDialog();
-            return;
+            session.endDialog('Account not found');
         });
     }
     /**
-     * This is the add stock dialog of the bot
+     * This is the quote dialog of the bot that displays a stock quote for symbol
+     * @param session
+     */
+    quoteDialog(session) {
+        PortfolioAccount_1.PortfolioAccount.ensureAccount(session).then((account) => {
+            let symbol = stocks.extractTextFromMessage(session.message);
+            stocks.getQuoteCard(symbol, session, account).then((card) => {
+                var msg = new builder.Message(session).addAttachment(card);
+                session.send(msg);
+                session.endDialog();
+            }, (err) => {
+                session.endDialog('Unknown stock symbol');
+            });
+        }, (err) => {
+            session.endDialog('Account not found');
+        });
+    }
+    /**
+     * This is the add stock dialog of the bot...it adds a stock to a portfolio
      * @param session
      */
     addDialog(session) {
@@ -162,37 +177,49 @@ class stocks {
         if (session.message.address.conversation) {
             PortfolioAccount_1.PortfolioAccount.ensureAccount(session).then((account) => {
                 let symbol = stocks.extractTextFromMessage(session.message).replace('add ', '').toUpperCase();
-                // TODO: ensure the stock isn't already there
-                let item = new PortfolioItem_1.PortfolioItem(symbol, session.message.user, new Date());
-                account.stocks.push(item);
-                account.update();
-                // send the deep link to the item
-                if (session.message.sourceEvent.teamsChannelId) {
-                    let dl_context = encodeURIComponent(`{"subEntityId": "${symbol}", "canvasUrl": "https://stocks.ngrok.io/teamPortfolioTab.html", "channelId": "${session.message.sourceEvent.teamsChannelId}"}`);
-                    let deeplink = `https://teams.microsoft.com/l/entity/f546297d-d54c-1009-a49a-efd66da91b2b/stocks?webUrl=${encodeURIComponent('https://www.cnbc.com/quotes/?symbol=' + symbol)}&label=${symbol}&context=${dl_context}`;
-                    session.send(`${symbol} has been added to the team portfolio and can be viewed <a href="${deeplink}">here</a>`);
+                // ensure the stock isn't already there
+                let found = false;
+                for (var i = 0; i < account.stocks.length; i++) {
+                    if (account.stocks[i].symbol === symbol) {
+                        found = true;
+                        session.endDialog(`${symbol} was already in your portfolio`);
+                        break;
+                    }
                 }
-                else {
-                    session.send(`${symbol} has been added to your portfolio`);
+                if (!found) {
+                    let item = new PortfolioItem_1.PortfolioItem(symbol, session.message.user, new Date());
+                    account.stocks.push(item);
+                    account.update();
+                    // send the deep link to the item but only in a Channel
+                    if (session.message.sourceEvent.teamsChannelId) {
+                        let dl_context = encodeURIComponent(`{"subEntityId": "${symbol}", "canvasUrl": "https://stocks.ngrok.io/teamPortfolioTab.html", "channelId": "${session.message.sourceEvent.teamsChannelId}"}`);
+                        let deeplink = `https://teams.microsoft.com/l/entity/f546297d-d54c-1009-a49a-efd66da91b2b/stocks?webUrl=${encodeURIComponent('https://www.cnbc.com/quotes/?symbol=' + symbol)}&label=${symbol}&context=${dl_context}`;
+                        session.send(`${symbol} has been added to the team portfolio and can be viewed <a href="${deeplink}">here</a>`);
+                    }
+                    else {
+                        session.send(`${symbol} has been added to your portfolio`);
+                    }
+                    session.endDialog();
                 }
-                session.endDialog();
+            }, (err) => {
+                session.endDialog('Account not found');
             });
         }
         else
             session.endDialog('Bad message');
     }
     /**
-     * This is the remove dialog of the bot
+     * This is the remove dialog of the bot...it removes a stock from a portfolio
      * @param session
      */
     removeDialog(session) {
         // ensure the conversation isn't null
         if (session.message.address.conversation) {
             PortfolioAccount_1.PortfolioAccount.ensureAccount(session).then((account) => {
-                // TODO: ensure the stock is already there
                 let symbol = stocks.extractTextFromMessage(session.message).replace('remove ', '').toUpperCase();
                 let msg = '';
                 for (var i = 0; i < account.stocks.length; i++) {
+                    // ensure stock is already there
                     if (account.stocks[i].symbol === symbol) {
                         account.stocks.splice(i, 1);
                         msg = `${symbol} has been removed from your portfolio`;
@@ -220,22 +247,6 @@ class stocks {
         session.endDialog();
     }
     /**
-     * This is an example of a conversationUpdate event handler
-     * @param activity
-     */
-    /*
-    convUpdateHandler(activity: any) {
-        if (activity.sourceEvent.eventType == 'teamMemberAdded' &&
-            activity.membersAdded[0].id == activity.address.bot.id) {
-            var botmessage = new builder.Message()
-                .address(activity.address)
-                .text(stocks.getHelpMsg());
-
-            this.universalBot.send(botmessage, function(err) {});
-        }
-    }
-    */
-    /**
      * Extracts text only from messages, removing all entity references
      * @param message builder.IMessage
      */
@@ -247,6 +258,37 @@ class stocks {
             });
         }
         return s.trim();
+    }
+    /**
+     * Builds a card for the stock
+     * @param quote StockQuote
+     */
+    static getQuoteCard(symbol, session, account) {
+        return new Promise((resolve, reject) => {
+            stockQuoteController_1.StockQuoteController.getQuote(symbol).then((quote) => {
+                let btn = builder.CardAction.imBack(session, `add ${quote.symbol}`, 'Add to portfolio');
+                for (var i = 0; i < account.stocks.length; i++) {
+                    if (account.stocks[i].symbol === symbol) {
+                        btn = builder.CardAction.imBack(session, `remove ${quote.symbol}`, 'Remove from portfolio');
+                    }
+                }
+                var card = stocks.formatQuoteCard(quote);
+                // send the deep link to the item but only in a Channel
+                if (session.message.sourceEvent.teamsChannelId) {
+                    let dl_context = encodeURIComponent(`{"subEntityId": "${symbol}", "canvasUrl": "https://stocks.ngrok.io/teamPortfolioTab.html", "channelId": "${session.message.sourceEvent.teamsChannelId}"}`);
+                    let deeplink = `https://teams.microsoft.com/l/entity/f546297d-d54c-1009-a49a-efd66da91b2b/stocks?webUrl=${encodeURIComponent('https://www.cnbc.com/quotes/?symbol=' + symbol)}&label=${symbol}&context=${dl_context}`;
+                    card.buttons([
+                        btn,
+                        builder.CardAction.openUrl(session, deeplink, 'View details')
+                    ]);
+                }
+                else
+                    card.buttons([btn]);
+                resolve(card.toAttachment());
+            }, (err) => {
+                reject(err);
+            });
+        });
     }
     /**
      * Formats a stock quote response

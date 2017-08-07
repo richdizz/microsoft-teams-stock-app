@@ -9,4 +9,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 // Added by generator-teams
 __export(require("./portfolioConfig"));
 __export(require("./portfolioTab"));
+__export(require("./portfolioRemove"));
 //# sourceMappingURL=client.js.map
