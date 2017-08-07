@@ -120,6 +120,7 @@ export class stocks {
      */
     defaultDialog(session: builder.Session) {
         let text = stocks.extractTextFromMessage(session.message);
+        console.log(text);
         if (text.startsWith('help')) {
             session.beginDialog('/help');
             return;
