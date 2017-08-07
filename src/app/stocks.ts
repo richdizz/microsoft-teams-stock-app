@@ -44,7 +44,8 @@ export class stocks {
  
         // Handle conversationUpdate events
         this.universalBot.on('conversationUpdate', (activity: any) => {
-            if (activity.sourceEvent.eventType == 'teamMemberAdded' &&
+            if (activity.sourceEvent && 
+                activity.sourceEvent.eventType == 'teamMemberAdded' &&
                 activity.membersAdded[0].id == activity.address.bot.id) {
                 var botmessage = new builder.Message()
                     .address(activity.address)
