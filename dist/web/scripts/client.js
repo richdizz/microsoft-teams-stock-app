@@ -38612,6 +38612,7 @@ var portfolioTab = (function () {
                         });
                     }, function (err) {
                         //TODO
+                        $scope.wait = false;
                         console.log(err);
                     });
                 });
