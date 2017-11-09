@@ -19,8 +19,8 @@
     "full": "The Stocks app for Microsoft Teams allows you to search stock quote and manage personal and team portfolios"
   },
   "icons": {
-    "outline": "https://teamportfolio.azurewebsites.net/assets/icon20.png", 
-    "color": "https://teamportfolio.azurewebsites.net/assets/icon96.png" 
+    "outline": "icon20.png", 
+    "color": "icon96.png" 
   },
   "accentColor": "#00b3ff",
   "configurableTabs": [

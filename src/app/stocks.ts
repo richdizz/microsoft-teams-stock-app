@@ -79,6 +79,7 @@ export class stocks {
                         
                         // get the last trade, change price, and change pct for each results
                         let symbols = filtered.map((a) => {return a.symbol;});
+                        /*
                         let symbols_str = symbols.join('+');
                         let uri = `http://finance.yahoo.com/d/quotes.csv?s=${symbols_str}&f=cl`
                         request.get(uri, {}, (err, resp, body) => {
@@ -112,6 +113,38 @@ export class stocks {
                                     .toResponse();
                                 callback(null, response, 200);
                             });
+                        });
+                        */
+
+                        let symbols_str = symbols.join('%2C');
+                        let uri = `https://api.wsj.net/api/dylan/quotes/v2/comp/quoteByDialect?id=${symbols_str}&dialect=charting&needed=CompositeTrading%7CBluegrassChannels%7CCurrencySpecific&MaxInstrumentMatches=1&ckey=cecc4267a0&EntitlementToken=cecc4267a0194af89ca343805a3e57af`
+                        request.get(uri, {}, (err, resp, body) => {
+                            var json = JSON.parse(body);
+
+                            // Add stock quotes to each result
+                            let attachments:any = [];
+                            for (var i = 0; i < filtered.length; i++) {
+                                let stock = json.InstrumentResponses[i].Matches[0];
+                                
+                                let last = stock.CompositeTrading.Price.Value;
+                                let change = stock.CompositeTrading.NetChange.Value;
+                                let change_pct = (last - (last + change)) / (last + change);
+
+                                // convert StockSymbol to full StockQuote
+                                let quote = new StockQuote();
+                                quote.symbol = filtered[i].symbol;
+                                quote.name = filtered[i].company_name;
+                                quote.current = +last;
+                                quote.curr_change = +change;
+                                quote.pct_change = +change_pct + 100;
+                                attachments.push(stocks.formatQuoteCard(quote).toAttachment());
+                            }
+
+                            // Return result response
+                            let response = teams.ComposeExtensionResponse.result('list')
+                                .attachments(attachments)
+                                .toResponse();
+                            callback(null, response, 200);
                         });
                     });
                 }

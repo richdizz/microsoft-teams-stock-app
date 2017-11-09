@@ -86,8 +86,8 @@ module.exports = require("request");
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const stockSymbol_1 = __webpack_require__(6);
-const parse = __webpack_require__(3);
+const stockSymbol_1 = __webpack_require__(5);
+const parse = __webpack_require__(7);
 const request = __webpack_require__(1);
 const cache = __webpack_require__(8);
 class StockSymbolController {
@@ -160,16 +160,10 @@ exports.StockSymbolController = StockSymbolController;
 /* 3 */
 /***/ (function(module, exports) {
 
-module.exports = require("csv-parse");
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
 module.exports = require("mongodb");
 
 /***/ }),
-/* 5 */
+/* 4 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -256,7 +250,7 @@ exports.StockQuoteController = StockQuoteController;
 
 
 /***/ }),
-/* 6 */
+/* 5 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -272,10 +266,16 @@ exports.StockSymbol = StockSymbol;
 
 
 /***/ }),
-/* 7 */
+/* 6 */
 /***/ (function(module, exports) {
 
 module.exports = require("botbuilder-teams");
+
+/***/ }),
+/* 7 */
+/***/ (function(module, exports) {
+
+module.exports = require("csv-parse");
 
 /***/ }),
 /* 8 */
@@ -296,10 +296,10 @@ const bodyParser = __webpack_require__(20);
 const http = __webpack_require__(23);
 const path = __webpack_require__(25);
 const morgan = __webpack_require__(24);
-const teams = __webpack_require__(7);
+const teams = __webpack_require__(6);
 const stocks_1 = __webpack_require__(18);
 const portfolioAccountController_1 = __webpack_require__(11);
-const stockQuoteController_1 = __webpack_require__(5);
+const stockQuoteController_1 = __webpack_require__(4);
 const stockSymbolController_1 = __webpack_require__(2);
 let express = Express();
 let port = process.env.port || process.env.PORT || 3008;
@@ -365,8 +365,8 @@ http.createServer(express).listen(port, (err) => {
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const stockSymbol_1 = __webpack_require__(6);
-const parse = __webpack_require__(3);
+const stockSymbol_1 = __webpack_require__(5);
+const parse = __webpack_require__(7);
 const request = __webpack_require__(1);
 const cache = __webpack_require__(8);
 class StockSymbolController {
@@ -443,7 +443,7 @@ exports.StockSymbolController = StockSymbolController;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const mongodb = __webpack_require__(4);
+const mongodb = __webpack_require__(3);
 const portfolioAccount_1 = __webpack_require__(16);
 const stockSymbolController_1 = __webpack_require__(2);
 class PortfolioAccountController {
@@ -524,7 +524,7 @@ exports.PortfolioAccountController = PortfolioAccountController;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const mongodb = __webpack_require__(4);
+const mongodb = __webpack_require__(3);
 class PortfolioAccount {
     constructor() {
         this.stocks = new Array();
@@ -656,7 +656,7 @@ exports.DateStat = DateStat;
 
 Object.defineProperty(exports, "__esModule", { value: true });
 __webpack_require__(0).config();
-const mongodb = __webpack_require__(4);
+const mongodb = __webpack_require__(3);
 class PortfolioAccount {
     constructor() {
         this.stocks = new Array();
@@ -758,12 +758,11 @@ __webpack_require__(0).config();
 const builder = __webpack_require__(21);
 const request = __webpack_require__(1);
 const StockQuote_1 = __webpack_require__(14);
-const stockQuoteController_1 = __webpack_require__(5);
+const stockQuoteController_1 = __webpack_require__(4);
 const StockSymbolController_1 = __webpack_require__(10);
 const PortfolioAccount_1 = __webpack_require__(12);
 const PortfolioItem_1 = __webpack_require__(13);
-const teams = __webpack_require__(7);
-const parse = __webpack_require__(3);
+const teams = __webpack_require__(6);
 /**
  * Implementation for Stocks
  */
@@ -816,13 +815,14 @@ class stocks {
                     let filtered = data.filter(symbol => symbol.symbol.indexOf(q) == 0).splice(skip, cnt);
                     // get the last trade, change price, and change pct for each results
                     let symbols = filtered.map((a) => { return a.symbol; });
+                    /*
                     let symbols_str = symbols.join('+');
-                    let uri = `http://finance.yahoo.com/d/quotes.csv?s=${symbols_str}&f=cl`;
+                    let uri = `http://finance.yahoo.com/d/quotes.csv?s=${symbols_str}&f=cl`
                     request.get(uri, {}, (err, resp, body) => {
                         // Parse the results as csv
                         parse(resp.body, {}, (parse_error, output) => {
                             // Add stock quotes to each result
-                            let attachments = [];
+                            let attachments:any = [];
                             for (var i = 0; i < filtered.length; i++) {
                                 // skip bad symbols
                                 if (output[i][0].indexOf('N/A') == -1) {
@@ -831,22 +831,51 @@ class stocks {
                                     change[1] = change[1].replace('%', '').replace('+', '');
                                     let last = output[i][1].split(' - ');
                                     last[1] = last[1].replace('<b>', '').replace('</b>', '');
+
                                     // convert StockSymbol to full StockQuote
-                                    let quote = new StockQuote_1.StockQuote();
+                                    let quote = new StockQuote();
                                     quote.symbol = filtered[i].symbol;
                                     quote.name = filtered[i].company_name;
                                     quote.current = +last[1];
                                     quote.curr_change = +change[0];
-                                    quote.pct_change = +change[1] / 100;
+                                    quote.pct_change = +change[1]/100;
                                     attachments.push(stocks.formatQuoteCard(quote).toAttachment());
                                 }
                             }
+
                             // Return result response
                             let response = teams.ComposeExtensionResponse.result('list')
                                 .attachments(attachments)
                                 .toResponse();
                             callback(null, response, 200);
                         });
+                    });
+                    */
+                    let symbols_str = symbols.join('%2C');
+                    let uri = `https://api.wsj.net/api/dylan/quotes/v2/comp/quoteByDialect?id=${symbols_str}&dialect=charting&needed=CompositeTrading%7CBluegrassChannels%7CCurrencySpecific&MaxInstrumentMatches=1&ckey=cecc4267a0&EntitlementToken=cecc4267a0194af89ca343805a3e57af`;
+                    request.get(uri, {}, (err, resp, body) => {
+                        var json = JSON.parse(body);
+                        // Add stock quotes to each result
+                        let attachments = [];
+                        for (var i = 0; i < filtered.length; i++) {
+                            let stock = json.InstrumentResponses[i].Matches[0];
+                            let last = stock.CompositeTrading.Price.Value;
+                            let change = stock.CompositeTrading.NetChange.Value;
+                            let change_pct = (last - (last + change)) / (last + change);
+                            // convert StockSymbol to full StockQuote
+                            let quote = new StockQuote_1.StockQuote();
+                            quote.symbol = filtered[i].symbol;
+                            quote.name = filtered[i].company_name;
+                            quote.current = +last;
+                            quote.curr_change = +change;
+                            quote.pct_change = +change_pct + 100;
+                            attachments.push(stocks.formatQuoteCard(quote).toAttachment());
+                        }
+                        // Return result response
+                        let response = teams.ComposeExtensionResponse.result('list')
+                            .attachments(attachments)
+                            .toResponse();
+                        callback(null, response, 200);
                     });
                 });
             }
