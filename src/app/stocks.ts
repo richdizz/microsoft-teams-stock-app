@@ -118,26 +118,29 @@ export class stocks {
 
                         let symbols_str = symbols.join('%2C');
                         let uri = `https://api.wsj.net/api/dylan/quotes/v2/comp/quoteByDialect?id=${symbols_str}&dialect=charting&needed=CompositeTrading%7CBluegrassChannels%7CCurrencySpecific&MaxInstrumentMatches=1&ckey=cecc4267a0&EntitlementToken=cecc4267a0194af89ca343805a3e57af`
-                        request.get(uri, {}, (err, resp, body) => {
+                        request.get(uri, { headers: { 'Accept': 'application/json' } }, (err, resp, body) => {
                             var json = JSON.parse(body);
 
                             // Add stock quotes to each result
                             let attachments:any = [];
                             for (var i = 0; i < filtered.length; i++) {
-                                let stock = json.InstrumentResponses[i].Matches[0];
-                                
-                                let last = stock.CompositeTrading.Price.Value;
-                                let change = stock.CompositeTrading.NetChange.Value;
-                                let change_pct = (last - (last + change)) / (last + change);
+                                // skip bad matches
+                                if (json.InstrumentResponses[i].Matches.length > 0) {
+                                    let stock = json.InstrumentResponses[i].Matches[0];
+                                    
+                                    let last = stock.CompositeTrading.Last.Price.Value;
+                                    let change = stock.CompositeTrading.NetChange.Value;
+                                    let change_pct = stock.CompositeTrading.ChangePercent;
 
-                                // convert StockSymbol to full StockQuote
-                                let quote = new StockQuote();
-                                quote.symbol = filtered[i].symbol;
-                                quote.name = filtered[i].company_name;
-                                quote.current = +last;
-                                quote.curr_change = +change;
-                                quote.pct_change = +change_pct + 100;
-                                attachments.push(stocks.formatQuoteCard(quote).toAttachment());
+                                    // convert StockSymbol to full StockQuote
+                                    let quote = new StockQuote();
+                                    quote.symbol = filtered[i].symbol;
+                                    quote.name = filtered[i].company_name;
+                                    quote.current = +last;
+                                    quote.curr_change = +change;
+                                    quote.pct_change = +change_pct;
+                                    attachments.push(stocks.formatQuoteCard(quote).toAttachment());
+                                }
                             }
 
                             // Return result response
@@ -363,7 +366,7 @@ export class stocks {
         var symbol = (quote.curr_change == 0) ? 'UNCH' : (quote.curr_change > 0) ? '&#9650;' : '&#9660;';
         return new builder.HeroCard()
                 .title(`${quote.symbol} ${quote.current}`)
-                .text(`<i><span style='color: ${color};'>${symbol} ${quote.curr_change.toFixed(3)} (${(quote.pct_change * 100).toFixed(3)}%)</span><br/>${quote.name}</i>`);
+                .text(`<i><span style='color: ${color};'>${symbol} ${quote.curr_change.toFixed(3)} (${(quote.pct_change).toFixed(3)}%)</span><br/>${quote.name}</i>`);
     }
 
     private static getHelpMsg() {
