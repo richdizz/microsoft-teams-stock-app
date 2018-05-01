@@ -9,7 +9,12 @@ export class StockSymbolController {
     private static getSymbolsForExchange(exchange:string) {
         return new Promise((resolve, reject) => {
             let array = new Array<StockSymbol>();
-            request.get(`http://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=${exchange}&render=download`, {}, (err, resp, body) => {
+            request.get(`https://www.nasdaq.com/screening/companies-by-name.aspx?letter=0&exchange=${exchange}&render=download`, { 
+                headers: { 
+                    "Accept": "application/text",
+                    "user-Agent": "PostmanRuntime/7.1.1",
+                    "Postman-Token": "6b84c8d4-4104-4318-8cc3-f92f58f12731"
+                }}, (err, resp, body) => {
                 // parse the results
                 parse(resp.body, {}, (parse_error, output) => {
                     if (parse_error)
